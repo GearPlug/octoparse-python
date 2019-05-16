@@ -94,6 +94,16 @@ class Client(object):
         return self._post(self.BASE_URL + '/api/task/GetTaskStatusByIdList', json=data)
 
     def get_task_parameters(self, task_id, name):
+        """
+        Configuration parameter name (navigateAction1.Url,loopAction1.UrlList,loopAction1.TextList, etc.)
+
+        Args:
+            task_id:
+            name:
+
+        Returns:
+
+        """
         params = {
             'taskId': task_id,
             'name': name
@@ -109,8 +119,6 @@ class Client(object):
         return self._post(self.BASE_URL + '/api/task/UpdateTaskRule', json=data)
 
     def add_url_text_to_loop(self, task_id, name, value):
-        if not isinstance(value, list):
-            raise Exception
         data = {
             'taskId': task_id,
             'name': name,

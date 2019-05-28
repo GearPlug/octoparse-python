@@ -1,5 +1,7 @@
 import requests
 
+from octoparse import exceptions
+
 API_BASE_URL = 'https://dataapi.octoparse.com'
 ADVANCED_API_BASE_URL = 'https://advancedapi.octoparse.com'
 
@@ -22,7 +24,7 @@ class Client(object):
         }
         return self._post(self.BASE_URL + '/token', data=data)
 
-    def refresh_token(self, refresh_token, grant_type='password'):
+    def refresh_token(self, refresh_token, grant_type='refresh_token'):
         data = {
             'refresh_token': refresh_token,
             'grant_type': grant_type
@@ -60,6 +62,29 @@ class Client(object):
             r = response.json()
         else:
             r = response.text
+
+        if not response.ok and 'error' in r:
+            error = r.get('error')
+            description = r.get('error_Description', None)
+            if error == 'invalid_grant':
+                raise exceptions.InvalidGrantError(description)
+            elif error == 'unsupported_grant_type':
+                raise exceptions.UnsupportedGrantTypeError(description)
+            elif error == 'unauthorized':
+                raise exceptions.UnauthorizedError(description)
+            elif error == 'user_not_allowed':
+                raise exceptions.UserNotAllowedError(description)
+            elif error == 'not_found':
+                raise exceptions.NotFoundError(description)
+            elif error == 'method_not_allowed':
+                raise exceptions.MethodNotAllowedError(description)
+            elif error == 'quota_exceeded':
+                raise exceptions.QuotaExceededError(description)
+            elif error == 'service_unavailable':
+                raise exceptions.ServiceUnavailableError(description)
+            else:
+                raise exceptions.UncaughtError(description)
+
         return r
 
     def list_task_groups(self):
